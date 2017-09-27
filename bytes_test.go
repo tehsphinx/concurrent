@@ -7,7 +7,7 @@ import (
 )
 
 func TestByte(t *testing.T) {
-	s := NewByte()
+	s := NewBytes()
 	testbyte := []byte("")
 	alphabet := []byte("abcdefghijklmnopqrstuvwxyz")
 	settovar := []byte("zzzzzzzzzz")
@@ -40,7 +40,7 @@ func TestByte(t *testing.T) {
 }
 
 func BenchmarkByte_Set(b *testing.B) {
-	s := NewByte()
+	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 
@@ -56,7 +56,7 @@ func BenchmarkByte_Set(b *testing.B) {
 }
 
 func BenchmarkByte_Get(b *testing.B) {
-	s := NewByte()
+	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 
@@ -72,7 +72,7 @@ func BenchmarkByte_Get(b *testing.B) {
 }
 
 func BenchmarkByte_Append(b *testing.B) {
-	s := NewByte()
+	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 
