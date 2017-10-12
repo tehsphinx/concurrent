@@ -1,6 +1,7 @@
 package concurrent
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 )
@@ -11,6 +12,7 @@ const (
 	actionSet actionTime = iota
 	actionGet
 	actionSince
+	actionMarshalJSON
 )
 
 type cmdTime struct {
@@ -18,6 +20,8 @@ type cmdTime struct {
 	time       time.Time
 	chTime     chan<- time.Time
 	chDuration chan<- time.Duration
+	chBytes    chan<- []byte
+	chErr      chan<- error
 }
 
 func NewTime() *Time {
@@ -50,6 +54,11 @@ func (s *Time) run() *Time {
 				c.chTime <- s.time
 			case actionSince:
 				c.chDuration <- time.Since(s.time)
+			case actionMarshalJSON:
+				b, err := json.Marshal(s.time)
+				c.chBytes <- b
+				c.chErr <- err
+
 			}
 		}
 	}()
@@ -89,4 +98,15 @@ func (s *Time) Since() time.Duration {
 
 func (s *Time) String() string {
 	return s.Get().String()
+}
+
+func (s *Time) MarshalJSON() ([]byte, error) {
+	ch := make(chan []byte)
+	chErr := make(chan error)
+	s.chCmd <- cmdTime{
+		action:  actionMarshalJSON,
+		chBytes: ch,
+		chErr:   chErr,
+	}
+	return <-ch, <-chErr
 }
