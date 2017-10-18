@@ -8,14 +8,13 @@ import (
 
 func TestByte(t *testing.T) {
 	s := NewBytes()
-	testbyte := []byte("")
 	alphabet := []byte("abcdefghijklmnopqrstuvwxyz")
 	settovar := []byte("zzzzzzzzzz")
 
 	for i := 0; i < 10; i++ {
 		go func() {
 			for {
-				testbyte = s.Get()
+				s.Get()
 			}
 		}()
 	}

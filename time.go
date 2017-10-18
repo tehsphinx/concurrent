@@ -58,7 +58,6 @@ func (s *Time) run() *Time {
 				b, err := json.Marshal(s.time)
 				c.chBytes <- b
 				c.chErr <- err
-
 			}
 		}
 	}()
