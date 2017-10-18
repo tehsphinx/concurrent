@@ -5,7 +5,7 @@ import "log"
 // NewBool creates a new concurrent bool
 func NewBool() *Bool {
 	s := &Bool{
-		chSet:      make(chan bool, 5),
+		chSet:      make(chan bool),
 		chGet:      make(chan chan bool, 5),
 		events:     []chan bool{},
 		chAddEvent: make(chan chan bool),

@@ -4,9 +4,26 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBool(t *testing.T) {
+	s := NewBool()
+
+	s.Set(false)
+	assert.Equal(t, false, s.Get())
+	s.Set(true)
+	assert.Equal(t, true, s.Get())
+	s.Set(false)
+	assert.Equal(t, false, s.Get())
+	s.Set(false)
+	assert.Equal(t, false, s.Get())
+	s.Set(true)
+	assert.Equal(t, true, s.Get())
+}
+
+func TestBoolConcurrent(t *testing.T) {
 	s := NewBool()
 
 	for i := 0; i < 100; i++ {
