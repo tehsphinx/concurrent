@@ -73,3 +73,28 @@ func (s *Int) run() *Int {
 
 	return s
 }
+
+func NewIntEvent() *IntEvent {
+	return &IntEvent{
+		chEvent: make(chan int, 1),
+	}
+}
+
+type IntEvent struct {
+	chEvent chan int
+}
+
+func (s *IntEvent) ListenerChannel() <-chan int {
+	return s.chEvent
+}
+
+func (s *IntEvent) Fire(val int) {
+	if len(s.chEvent) != 0 {
+		<-s.chEvent
+	}
+	s.chEvent <- val
+}
+
+func (s *IntEvent) Close() {
+	close(s.chEvent)
+}

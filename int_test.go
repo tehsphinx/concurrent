@@ -92,3 +92,33 @@ func BenchmarkInt_Set(b *testing.B) {
 	}
 	wg.Wait()
 }
+
+func TestIntEvent(t *testing.T) {
+	event := NewIntEvent()
+	ch := event.ListenerChannel()
+
+	go func(ch <-chan int) {
+		i := 0
+		for val := range ch {
+			assert.Equal(t, i, val)
+			i++
+		}
+	}(ch)
+
+	for i := 0; i < 10; i++ {
+		event.Fire(i)
+		// wait a bit so we do not overwrite values
+		time.Sleep(10 * time.Millisecond)
+	}
+	event.Close()
+
+	// no listener this time. Should not block!
+	event = NewIntEvent()
+	ch = event.ListenerChannel()
+	for i := 0; i < 10; i++ {
+		event.Fire(i)
+	}
+
+	// should get last last value
+	assert.Equal(t, 9, <-ch)
+}
