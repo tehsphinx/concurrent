@@ -24,6 +24,7 @@ type cmdTime struct {
 	chErr      chan<- error
 }
 
+// NewTime creates a new concurrent time
 func NewTime() *Time {
 	t := &Time{
 		chCmd: make(chan cmdTime, 5),
@@ -31,6 +32,7 @@ func NewTime() *Time {
 	return t.run()
 }
 
+// Time is a concurrent time object
 type Time struct {
 	time  time.Time
 	chCmd chan cmdTime
@@ -64,11 +66,13 @@ func (s *Time) run() *Time {
 	return s
 }
 
+// Now sets time to current time
 func (s *Time) Now() *Time {
 	s.Set(time.Now())
 	return s
 }
 
+// Set sets the time
 func (s *Time) Set(t time.Time) *Time {
 	s.chCmd <- cmdTime{
 		action: actionSet,
@@ -77,6 +81,7 @@ func (s *Time) Set(t time.Time) *Time {
 	return s
 }
 
+// Get returns the time
 func (s *Time) Get() time.Time {
 	ch := make(chan time.Time)
 	s.chCmd <- cmdTime{
@@ -86,6 +91,7 @@ func (s *Time) Get() time.Time {
 	return <-ch
 }
 
+// Since implements time.Since
 func (s *Time) Since() time.Duration {
 	ch := make(chan time.Duration)
 	s.chCmd <- cmdTime{
@@ -95,10 +101,12 @@ func (s *Time) Since() time.Duration {
 	return <-ch
 }
 
+// String returns the time formatted as string
 func (s *Time) String() string {
 	return s.Get().String()
 }
 
+// MarshalJSON implements save marshalling
 func (s *Time) MarshalJSON() ([]byte, error) {
 	ch := make(chan []byte)
 	chErr := make(chan error)

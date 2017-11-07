@@ -15,12 +15,11 @@ const (
 )
 
 type cmdSliceChanString struct {
-	action  actionSliceChanString
-	ch      chan string
-	chOk    chan bool
-	chLen   chan int
-	chRange chan chan string
-	msg     string
+	action actionSliceChanString
+	ch     chan string
+	chOk   chan bool
+	chLen  chan int
+	msg    string
 }
 
 // NewSliceChanString creates a new concurrent slice of bytes
@@ -46,7 +45,7 @@ func (s *SliceChanString) Add(ch chan string) {
 	}
 }
 
-// Remove removes a channel from the slice
+// Remove removes a channel from the slice and closes it
 func (s *SliceChanString) Remove(ch chan string) bool {
 	chOk := make(chan bool)
 	s.chCmd <- cmdSliceChanString{
@@ -57,12 +56,14 @@ func (s *SliceChanString) Remove(ch chan string) bool {
 	return <-chOk
 }
 
+// RemoveAll removes alls channels and closes them
 func (s *SliceChanString) RemoveAll() {
 	s.chCmd <- cmdSliceChanString{
 		action: actionRemoveAllChanString,
 	}
 }
 
+// Send sends on all channels
 func (s *SliceChanString) Send(msg string) {
 	s.chCmd <- cmdSliceChanString{
 		action: actionSendChanString,
@@ -70,6 +71,7 @@ func (s *SliceChanString) Send(msg string) {
 	}
 }
 
+// Len returns the count of the channels
 func (s *SliceChanString) Len() int {
 	chLen := make(chan int)
 	s.chCmd <- cmdSliceChanString{

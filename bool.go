@@ -34,6 +34,7 @@ func (s *Bool) Get() bool {
 	return <-ch
 }
 
+// GetStatusChannel returns a channel to listen to for status changes
 func (s *Bool) GetStatusChannel() <-chan bool {
 	ch := make(chan bool, 5)
 	s.chAddEvent <- ch
@@ -58,6 +59,7 @@ func (s *Bool) run() *Bool {
 
 				if send {
 					for _, e := range s.events {
+						// TODO: make this blocking save: if one channel blocks
 						e <- b
 					}
 				}

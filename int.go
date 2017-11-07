@@ -34,12 +34,14 @@ func (s *Int) Get() int {
 	return <-ch
 }
 
+// Decrease decreases the integer
 func (s *Int) Decrease() int {
 	ch := make(chan int)
 	s.chDecrease <- ch
 	return <-ch
 }
 
+// Increase increases the integer
 func (s *Int) Increase() int {
 	ch := make(chan int)
 	s.chIncrease <- ch
@@ -74,20 +76,26 @@ func (s *Int) run() *Int {
 	return s
 }
 
+// NewIntEvent creates a new integer event
 func NewIntEvent() *IntEvent {
 	return &IntEvent{
 		chEvent: make(chan int, 1),
 	}
 }
 
+// IntEvent is a event-like object that can be listened to
+// and fired. The specialty is that it does not block if
+// no one is listening. Currently only supports one listener.
 type IntEvent struct {
 	chEvent chan int
 }
 
+// ListenerChannel returns the channel to listen on
 func (s *IntEvent) ListenerChannel() <-chan int {
 	return s.chEvent
 }
 
+// Fire fires the event
 func (s *IntEvent) Fire(val int) {
 	if len(s.chEvent) != 0 {
 		<-s.chEvent
@@ -95,6 +103,7 @@ func (s *IntEvent) Fire(val int) {
 	s.chEvent <- val
 }
 
+// Close closes the event by closing the channel
 func (s *IntEvent) Close() {
 	close(s.chEvent)
 }
