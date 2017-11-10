@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestByte(t *testing.T) {
+func TestBytes(t *testing.T) {
 	s := NewBytes()
 	alphabet := []byte("abcdefghijklmnopqrstuvwxyz")
 	settovar := []byte("zzzzzzzzzz")
@@ -38,7 +38,7 @@ func TestByte(t *testing.T) {
 	time.Sleep(5 * time.Second)
 }
 
-func BenchmarkByte_Set(b *testing.B) {
+func BenchmarkBytes_Set(b *testing.B) {
 	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
@@ -54,7 +54,7 @@ func BenchmarkByte_Set(b *testing.B) {
 	wg.Wait()
 }
 
-func BenchmarkByte_Get(b *testing.B) {
+func BenchmarkBytes_Get(b *testing.B) {
 	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
@@ -70,7 +70,7 @@ func BenchmarkByte_Get(b *testing.B) {
 	wg.Wait()
 }
 
-func BenchmarkByte_Append(b *testing.B) {
+func BenchmarkBytes_Append(b *testing.B) {
 	s := NewBytes()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)

@@ -1,79 +1,51 @@
 package concurrent
 
-import "log"
+import (
+	"sync"
+)
 
 // NewInt creates a new concurrent int
 func NewInt() *Int {
-	s := &Int{
-		chSet:      make(chan int, 5),
-		chGet:      make(chan chan int, 5),
-		chIncrease: make(chan chan int, 5),
-		chDecrease: make(chan chan int, 5),
-	}
-	return s.run()
+	return &Int{}
 }
 
 // Int implements a cuncurrent int
 type Int struct {
-	int        int
-	chSet      chan int
-	chGet      chan chan int
-	chIncrease chan chan int
-	chDecrease chan chan int
+	int      int
+	intMutex sync.RWMutex
 }
 
 // Set sets the int to given value
 func (s *Int) Set(i int) {
-	s.chSet <- i
+	s.intMutex.Lock()
+	s.int = i
+	s.intMutex.Unlock()
 }
 
 // Get gets the int value
 func (s *Int) Get() int {
-	ch := make(chan int)
-	s.chGet <- ch
-	return <-ch
+	s.intMutex.RLock()
+	defer s.intMutex.RUnlock()
+
+	return s.int
 }
 
 // Decrease decreases the integer
 func (s *Int) Decrease() int {
-	ch := make(chan int)
-	s.chDecrease <- ch
-	return <-ch
+	s.intMutex.Lock()
+	defer s.intMutex.Unlock()
+
+	s.int--
+	return s.int
 }
 
 // Increase increases the integer
 func (s *Int) Increase() int {
-	ch := make(chan int)
-	s.chIncrease <- ch
-	return <-ch
-}
+	s.intMutex.Lock()
+	defer s.intMutex.Unlock()
 
-func (s *Int) run() *Int {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Println("concurrent.(Int).run panicked:", r)
-			}
-
-			s.run()
-		}()
-
-		for {
-			select {
-			case s.int = <-s.chSet:
-			case ch := <-s.chGet:
-				ch <- s.int
-			case ch := <-s.chIncrease:
-				s.int++
-				ch <- s.int
-			case ch := <-s.chDecrease:
-				s.int--
-				ch <- s.int
-			}
-		}
-	}()
-
-	return s
+	s.int++
+	return s.int
 }
 
 // NewIntEvent creates a new integer event

@@ -1,53 +1,31 @@
 package concurrent
 
-import "log"
+import (
+	"sync"
+)
 
 // NewString creates a new concurrent string
 func NewString() *String {
-	s := &String{
-		chSet: make(chan string, 5),
-		chGet: make(chan chan string, 5),
-	}
-	return s.run()
+	return &String{}
 }
 
 // String implements a cuncurrent string
 type String struct {
-	str   string
-	chSet chan string
-	chGet chan chan string
+	str      string
+	strMutex sync.RWMutex
 }
 
 // Set sets the string to given value
 func (s *String) Set(str string) {
-	s.chSet <- str
+	s.strMutex.Lock()
+	s.str = str
+	s.strMutex.Unlock()
 }
 
 // Get gets the string value
 func (s *String) Get() string {
-	ch := make(chan string)
-	s.chGet <- ch
-	return <-ch
-}
+	s.strMutex.RLock()
+	defer s.strMutex.RUnlock()
 
-func (s *String) run() *String {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Println("concurrent.(String).run panicked:", r)
-			}
-
-			s.run()
-		}()
-
-		for {
-			select {
-			case s.str = <-s.chSet:
-			case ch := <-s.chGet:
-				ch <- s.str
-			}
-		}
-	}()
-
-	return s
+	return s.str
 }

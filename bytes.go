@@ -1,64 +1,42 @@
 package concurrent
 
 import (
-	"log"
+	"sync"
 )
 
 // NewBytes creates a new concurrent slice of bytes
 func NewBytes() *Bytes {
-	s := &Bytes{
-		chSet:    make(chan []byte, 5),
-		chAppend: make(chan []byte, 5),
-		chGet:    make(chan chan []byte, 5),
-	}
-	return s.run()
+	return &Bytes{}
 }
 
 // Bytes implements a cuncurrent slice of bytes
 type Bytes struct {
-	byte     []byte
-	chSet    chan []byte
-	chAppend chan []byte
-	chGet    chan chan []byte
+	byte      []byte
+	byteMutex sync.RWMutex
+	//chSet    chan []byte
+	//chAppend chan []byte
+	//chGet    chan chan []byte
 }
 
 // Set sets the byte to given value
-func (s *Bytes) Set(alphabet []byte) {
-	s.chSet <- alphabet
+func (s *Bytes) Set(b []byte) {
+	s.byteMutex.Lock()
+	s.byte = b
+	s.byteMutex.Unlock()
 }
 
 // Get gets the byte value
 func (s *Bytes) Get() []byte {
-	ch := make(chan []byte)
-	s.chGet <- ch
-	return <-ch
+	s.byteMutex.RLock()
+	defer s.byteMutex.RUnlock()
+
+	return s.byte
 }
 
 // Append appends the slice of bytes value to byte
 func (s *Bytes) Append(m []byte) {
-	s.chAppend <- m
-}
+	s.byteMutex.Lock()
+	defer s.byteMutex.Unlock()
 
-func (s *Bytes) run() *Bytes {
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Println("concurrent.(Bytes).run panicked:", r)
-			}
-
-			s.run()
-		}()
-
-		for {
-			select {
-			case addbyte := <-s.chAppend:
-				s.byte = append(s.byte, addbyte...)
-			case s.byte = <-s.chSet:
-			case ch := <-s.chGet:
-				ch <- s.byte
-			}
-		}
-	}()
-
-	return s
+	s.byte = append(s.byte, m...)
 }
