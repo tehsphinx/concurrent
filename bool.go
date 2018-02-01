@@ -20,22 +20,24 @@ type Bool struct {
 	events    []chan bool
 }
 
-// Set sets the bool to given value
-func (s *Bool) Set(b bool) bool {
+// Set sets the bool to given value and returns if it changed or not. This
+// can be used in race cases where a value could change inbetween the 'if'
+// and setting the new value, making sure two routines executing simultaneously
+// will not both get the same result checking the bool.
+func (s *Bool) Set(b bool) (ok bool) {
 	s.boolMutex.Lock()
 	defer s.boolMutex.Unlock()
 
-	changed := s.bool != b
-	s.bool = b
-
-	if changed {
+	ok = s.bool != b
+	if ok {
+		s.bool = b
 		for _, e := range s.events {
 			if len(e) < eventChannelLen {
 				e <- b
 			}
 		}
 	}
-	return changed
+	return ok
 }
 
 // Get gets the bool value
