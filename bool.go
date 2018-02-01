@@ -21,20 +21,21 @@ type Bool struct {
 }
 
 // Set sets the bool to given value
-func (s *Bool) Set(b bool) {
+func (s *Bool) Set(b bool) bool {
 	s.boolMutex.Lock()
 	defer s.boolMutex.Unlock()
 
-	send := s.bool != b
+	changed := s.bool != b
 	s.bool = b
 
-	if send {
+	if changed {
 		for _, e := range s.events {
 			if len(e) < eventChannelLen {
 				e <- b
 			}
 		}
 	}
+	return changed
 }
 
 // Get gets the bool value
