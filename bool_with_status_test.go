@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBool(t *testing.T) {
-	s := NewBool()
+func TestBoolWithStatus(t *testing.T) {
+	s := NewBoolWithStatus()
 
 	s.Set(false)
 	assert.Equal(t, false, s.Get())
@@ -22,13 +22,13 @@ func TestBool(t *testing.T) {
 	assert.Equal(t, true, s.Get())
 }
 
-func TestBoolConcurrent(t *testing.T) {
-	s := NewBool()
+func TestBoolWithStatusConcurrent(t *testing.T) {
+	s := NewBoolWithStatus()
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 	go func() {
-		for i := 0; i < 1<<30; i++ {
+		for i := 0; i < 1<<20; i++ {
 			s.Get()
 		}
 		wg.Done()
@@ -36,7 +36,7 @@ func TestBoolConcurrent(t *testing.T) {
 
 	for i := 0; i < 2; i++ {
 		go func(b bool) {
-			for i := 0; i < 1<<20; i++ {
+			for i := 0; i < 1<<15; i++ {
 				s.Set(b)
 			}
 			wg.Done()
@@ -45,8 +45,8 @@ func TestBoolConcurrent(t *testing.T) {
 	wg.Wait()
 }
 
-func BenchmarkBool_Get(b *testing.B) {
-	s := NewBool()
+func BenchmarkBoolWithStatus_Get(b *testing.B) {
+	s := NewBoolWithStatus()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 
@@ -61,8 +61,8 @@ func BenchmarkBool_Get(b *testing.B) {
 	wg.Wait()
 }
 
-func BenchmarkBool_Set(b *testing.B) {
-	s := NewBool()
+func BenchmarkBoolWithStatus_Set(b *testing.B) {
+	s := NewBoolWithStatus()
 	wg := &sync.WaitGroup{}
 	wg.Add(10)
 

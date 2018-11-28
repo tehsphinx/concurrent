@@ -2,9 +2,8 @@ package concurrent
 
 import (
 	"sync"
+	"sync/atomic"
 )
-
-var eventChannelLen = 5
 
 // NewBool creates a new concurrent bool
 func NewBool() *Bool {
@@ -15,7 +14,7 @@ func NewBool() *Bool {
 
 // Bool implements a cuncurrent bool
 type Bool struct {
-	bool      bool
+	bool      int32
 	boolMutex sync.RWMutex
 	events    []chan bool
 }
@@ -25,34 +24,16 @@ type Bool struct {
 // and setting the new value, making sure two routines executing simultaneously
 // will not both get the same result checking the bool.
 func (s *Bool) Set(b bool) (ok bool) {
-	s.boolMutex.Lock()
-	defer s.boolMutex.Unlock()
-
-	ok = s.bool != b
-	if ok {
-		s.bool = b
-		for _, e := range s.events {
-			if len(e) < eventChannelLen {
-				e <- b
-			}
-		}
+	var o, n int32
+	if !b {
+		o = 1
+	} else {
+		n = 1
 	}
-	return ok
+	return atomic.CompareAndSwapInt32((*int32)(&s.bool), o, n)
 }
 
 // Get gets the bool value
 func (s *Bool) Get() bool {
-	s.boolMutex.RLock()
-	defer s.boolMutex.RUnlock()
-
-	return s.bool
-}
-
-// GetStatusChannel returns a channel to listen to for status changes
-func (s *Bool) GetStatusChannel() <-chan bool {
-	ch := make(chan bool, eventChannelLen)
-	s.boolMutex.Lock()
-	s.events = append(s.events, ch)
-	s.boolMutex.Unlock()
-	return ch
+	return atomic.LoadInt32((*int32)(&s.bool)) == 1
 }
