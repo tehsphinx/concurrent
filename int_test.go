@@ -21,44 +21,46 @@ func TestInt(t *testing.T) {
 func TestInt_Increase(t *testing.T) {
 	s := NewInt()
 
-	len := 10
-	for i := 0; i < len; i++ {
+	l := 10
+	for i := 0; i < l; i++ {
 		s.Increase()
 	}
 	k := s.Get()
-	assert.Equal(t, len, k)
+	assert.Equal(t, l, k)
 }
 
 func TestInt_Decrease(t *testing.T) {
 	s := NewInt()
 
-	len := 10
-	for i := 0; i < len; i++ {
+	l := 10
+	for i := 0; i < l; i++ {
 		s.Decrease()
 	}
 	k := s.Get()
-	assert.Equal(t, -len, k)
+	assert.Equal(t, -l, k)
 }
+
 func TestInt_Concurrent(t *testing.T) {
 	s := NewInt()
 
-	for i := 0; i < 100; i++ {
-		go func() {
-			for {
-				s.Get()
-			}
-		}()
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		for i := 0; i < 1<<30; i++ {
+			s.Get()
+		}
+		wg.Done()
+	}()
 
-	for i := 0; i < 10; i++ {
-		go func(i int) {
-			for {
+	for i := 0; i < 2; i++ {
+		go func(n int) {
+			for i := 0; i < n; i++ {
 				s.Set(i)
 			}
-		}(i)
+			wg.Done()
+		}(i << 30)
 	}
-
-	time.Sleep(5 * time.Second)
+	wg.Wait()
 }
 
 func BenchmarkInt_Get(b *testing.B) {

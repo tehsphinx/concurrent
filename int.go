@@ -1,51 +1,33 @@
 package concurrent
 
-import (
-	"sync"
-)
+import "sync/atomic"
 
 // NewInt creates a new concurrent int
 func NewInt() *Int {
-	return &Int{}
+	return new(Int)
 }
 
 // Int implements a cuncurrent int
-type Int struct {
-	int      int
-	intMutex sync.RWMutex
-}
+type Int int64
 
 // Set sets the int to given value
 func (s *Int) Set(i int) {
-	s.intMutex.Lock()
-	s.int = i
-	s.intMutex.Unlock()
+	atomic.StoreInt64((*int64)(s), int64(i))
 }
 
 // Get gets the int value
 func (s *Int) Get() int {
-	s.intMutex.RLock()
-	defer s.intMutex.RUnlock()
-
-	return s.int
+	return int(atomic.LoadInt64((*int64)(s)))
 }
 
 // Decrease decreases the integer
 func (s *Int) Decrease() int {
-	s.intMutex.Lock()
-	defer s.intMutex.Unlock()
-
-	s.int--
-	return s.int
+	return int(atomic.AddInt64((*int64)(s), -1))
 }
 
 // Increase increases the integer
 func (s *Int) Increase() int {
-	s.intMutex.Lock()
-	defer s.intMutex.Unlock()
-
-	s.int++
-	return s.int
+	return int(atomic.AddInt64((*int64)(s), 1))
 }
 
 // NewIntEvent creates a new integer event
