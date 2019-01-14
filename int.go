@@ -30,6 +30,11 @@ func (s *Int) Increase() int {
 	return int(atomic.AddInt64((*int64)(s), 1))
 }
 
+// Swap sets the int to given value and returns the old one
+func (s *Int) Swap(i int) int {
+	return int(atomic.SwapInt64((*int64)(s), int64(i)))
+}
+
 // NewIntEvent creates a new integer event
 func NewIntEvent() *IntEvent {
 	return &IntEvent{
