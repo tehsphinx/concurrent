@@ -1,6 +1,9 @@
 package concurrent
 
-import "sync/atomic"
+import (
+	"encoding/json"
+	"sync/atomic"
+)
 
 // NewInt creates a new concurrent int
 func NewInt() *Int {
@@ -33,6 +36,11 @@ func (s *Int) Increase() int {
 // Swap sets the int to given value and returns the old one
 func (s *Int) Swap(i int) int {
 	return int(atomic.SwapInt64((*int64)(s), int64(i)))
+}
+
+// MarshalJSON adds json marshalling to the concurrent bool
+func (s *Int) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.Get())
 }
 
 // NewIntEvent creates a new integer event

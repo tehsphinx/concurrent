@@ -1,6 +1,7 @@
 package concurrent
 
 import (
+	"encoding/json"
 	"sync/atomic"
 )
 
@@ -9,7 +10,7 @@ func NewBool() *Bool {
 	return new(Bool)
 }
 
-// Bool implements a cuncurrent bool
+// Bool implements a concurrent bool
 type Bool int32
 
 // Set sets the bool to given value and returns if it changed or not. This
@@ -27,4 +28,9 @@ func (s *Bool) Set(b bool) (ok bool) {
 // Get gets the bool value
 func (s *Bool) Get() bool {
 	return atomic.LoadInt32((*int32)(s)) == 1
+}
+
+// MarshalJSON adds json marshalling to the concurrent bool
+func (s *Bool) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.Get())
 }
