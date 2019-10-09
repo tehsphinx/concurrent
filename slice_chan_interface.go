@@ -4,28 +4,28 @@ import (
 	"sync"
 )
 
-// NewSliceChanString creates a new concurrent slice of chan string
-func NewSliceChanString() *SliceChanString {
-	return &SliceChanString{
-		slice: []chan string{},
+// NewSliceChanInterface creates a new concurrent slice of chan interface{}
+func NewSliceChanInterface() *SliceChanInterface {
+	return &SliceChanInterface{
+		slice: []chan interface{}{},
 	}
 }
 
-// SliceChanString implements a cuncurrent slice of chan string
-type SliceChanString struct {
-	slice []chan string
+// SliceChanInterface implements a cuncurrent slice of chan interface{}
+type SliceChanInterface struct {
+	slice []chan interface{}
 	mutex sync.RWMutex
 }
 
 // Add appends a channel to the slice
-func (s *SliceChanString) Add(ch chan string) {
+func (s *SliceChanInterface) Add(ch chan interface{}) {
 	s.mutex.Lock()
 	s.slice = append(s.slice, ch)
 	s.mutex.Unlock()
 }
 
 // Remove removes a channel from the slice and closes it
-func (s *SliceChanString) Remove(ch chan string) bool {
+func (s *SliceChanInterface) Remove(ch chan interface{}) bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -41,18 +41,18 @@ func (s *SliceChanString) Remove(ch chan string) bool {
 }
 
 // RemoveAll removes alls channels and closes them
-func (s *SliceChanString) RemoveAll() {
+func (s *SliceChanInterface) RemoveAll() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	for _, ch := range s.slice {
 		close(ch)
 	}
-	s.slice = []chan string{}
+	s.slice = []chan interface{}{}
 }
 
 // Send sends on all channels
-func (s *SliceChanString) Send(msg string) {
+func (s *SliceChanInterface) Send(msg interface{}) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -62,7 +62,7 @@ func (s *SliceChanString) Send(msg string) {
 }
 
 // Len returns the count of the channels
-func (s *SliceChanString) Len() int {
+func (s *SliceChanInterface) Len() int {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
