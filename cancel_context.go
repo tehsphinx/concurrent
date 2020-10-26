@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
-var _ context.Context = &CancelContext{}
-
 // NewCancelContext creates a new cancel context from given context
 // and wraps it in the concurrency save struct CancelContext.
+//
+// Note: this context does not implement the context.Context interface
+// because contexts derived from it would still be done if this context
+// gets resetted.
 func NewCancelContext(ctx context.Context) *CancelContext {
 	s := &CancelContext{}
 	s.Reset(ctx)
@@ -59,12 +61,4 @@ func (s *CancelContext) Err() error {
 	defer s.m.RUnlock()
 
 	return s.ctxCancel.Err()
-}
-
-// Value implements context.Context
-func (s *CancelContext) Value(key interface{}) interface{} {
-	s.m.RLock()
-	defer s.m.RUnlock()
-
-	return s.ctxCancel.Value(key)
 }
