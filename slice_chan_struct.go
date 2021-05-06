@@ -61,6 +61,19 @@ func (s *SliceChanStruct) Send() {
 	}
 }
 
+// SendNonBlocking sends on all channels. If a channel is blocking it will skip that channel.
+func (s *SliceChanStruct) SendNonBlocking() {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	for _, ch := range s.slice {
+		select {
+		case ch <- struct{}{}:
+		default:
+		}
+	}
+}
+
 // Len returns the count of the channels
 func (s *SliceChanStruct) Len() int {
 	s.mutex.RLock()
