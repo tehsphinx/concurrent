@@ -61,6 +61,19 @@ func (s *SliceChanBytes) Send(msg []byte) {
 	}
 }
 
+// SendNonBlocking sends on all channels. If a channel is blocking, it is skipped.
+func (s *SliceChanBytes) SendNonBlocking(msg []byte) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	for _, ch := range s.slice {
+		select {
+		case ch <- msg:
+		default:
+		}
+	}
+}
+
 // Len returns the count of the channels
 func (s *SliceChanBytes) Len() int {
 	s.mutex.RLock()
